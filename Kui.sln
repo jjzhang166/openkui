@@ -1,0 +1,29 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sample1", "Samples\Sample1\Sample1.vcproj", "{1396D195-2B0F-4724-B459-EAEC773F3A66}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sample2", "Samples\Sample2\Sample2.vcproj", "{9412D2C3-4A03-4665-B781-B47D87469C49}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{1396D195-2B0F-4724-B459-EAEC773F3A66}.Debug.ActiveCfg = Debug|Win32
+		{1396D195-2B0F-4724-B459-EAEC773F3A66}.Debug.Build.0 = Debug|Win32
+		{1396D195-2B0F-4724-B459-EAEC773F3A66}.Release.ActiveCfg = Release|Win32
+		{1396D195-2B0F-4724-B459-EAEC773F3A66}.Release.Build.0 = Release|Win32
+		{9412D2C3-4A03-4665-B781-B47D87469C49}.Debug.ActiveCfg = Debug|Win32
+		{9412D2C3-4A03-4665-B781-B47D87469C49}.Debug.Build.0 = Debug|Win32
+		{9412D2C3-4A03-4665-B781-B47D87469C49}.Release.ActiveCfg = Release|Win32
+		{9412D2C3-4A03-4665-B781-B47D87469C49}.Release.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal
