@@ -26,9 +26,9 @@
 #pragma warning(disable: 6386)
 #include "../../3Party/tinyxml/tinyxml.h"
 #include <atlbase.h>
-#include <atlapp.h>
+#include "../../3Party/wtl/atlapp.h"
 #pragma warning(pop)
-#include <atlmisc.h>
+#include "../../3Party/wtl/atlmisc.h"
 #include <atlstr.h>
 #include <ShlObj.h>
 

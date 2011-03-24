@@ -13,7 +13,7 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="../../import/kclear_lib/win32d/"
+			OutputDirectory="../lib/"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="1">
@@ -34,7 +34,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(ProjectDir)\..\lib\kscbase.lib"/>
+				OutputFile="$(ProjectDir)\..\lib\kscbaseD.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -56,7 +56,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="../../import/kclear_lib/win32/"
+			OutputDirectory="../lib/"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="1"
