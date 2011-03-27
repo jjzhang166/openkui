@@ -64,6 +64,7 @@ protected:
     int             m_nHoverItem;
     int             m_nPushItem;
     int             m_nLastDrawItem;
+	BOOL			m_bWhenResizeScrollTop;
 
     // Tracking flag
     BOOL            m_bTrackFlag;
@@ -81,6 +82,7 @@ public:
         , m_nHoverItem(-1)
         , m_nPushItem(-1)
         , m_nLastDrawItem(-1)
+		, m_bWhenResizeScrollTop(FALSE)
     {
     }
 
@@ -209,6 +211,11 @@ public:
     {
         return CKuiViewImpl<T>::SetItemText(uItemID, lpszText);
     }
+
+	VOID SetWhenResizeScrollToTop( BOOL bAutoTop )
+	{
+		m_bWhenResizeScrollTop = bAutoTop;
+	}
 
 //     BOOL SetItemCount(int nItems)
 //     {
@@ -409,11 +416,10 @@ protected:
 
         m_imgMem.CreateBitmap(rcClient.Width(), m_nItemHeight, RGB(0, 0, 0));
 
-
-
         WINDOWPOS WndPos = { 0, 0, rcClient.left, rcClient.top, rcClient.Width(), rcClient.Height(), SWP_SHOWWINDOW };
 
         m_kuiListTemplate.KuiSendMessage(WM_WINDOWPOSCHANGED, 0, (LPARAM)&WndPos);
+
     }
 
     void OnSize(UINT nType, CSize /*size*/)

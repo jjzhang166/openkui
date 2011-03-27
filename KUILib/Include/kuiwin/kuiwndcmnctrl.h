@@ -19,7 +19,7 @@
 //
 class CKuiMemoryImage : public CKuiWindow
 {
-	KUIOBJ_DECLARE_CLASS_NAME(CBkMemoryImage, "memimage")
+	KUIOBJ_DECLARE_CLASS_NAME(CKuiMemoryImage, "memimage")
 
 		CKuiMemoryImage()
 	{
@@ -1144,7 +1144,7 @@ public:
 			{
 				strSkin = strSkin.Left(nIndex);
 				strSkinValue = arrList[i].Mid(nIndex+1);
-				m_mapSkin[strSkin] = BkSkin::GetSkin(strSkinValue);
+				m_mapSkin[strSkin] = KuiSkin::GetSkin(strSkinValue);
 			}
 		}
 	}

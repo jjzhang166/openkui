@@ -14,6 +14,10 @@ class CKuiTab : public CKuiDialog
     KUIOBJ_DECLARE_CLASS_NAME(CKuiTab, "tab")
 
 public:
+    CKuiTab()
+    {
+        m_bHidden = FALSE;
+    }
 
     LPCTSTR GetTitle()
     {
@@ -42,6 +46,7 @@ protected:
 
     KUIWIN_DECLARE_ATTRIBUTES_BEGIN()
         KUIWIN_TSTRING_ATTRIBUTE("title", m_strTitle, FALSE)
+		KUIWIN_UINT_ATTRIBUTE("hide", m_bHidden, FALSE)
     KUIWIN_DECLARE_ATTRIBUTES_END()
 };
 
@@ -226,7 +231,7 @@ public:
 
             nPage ++;
 
-            pNewChildWindow->SetParent(m_hBkWnd);
+            pNewChildWindow->SetParent(m_hKuiWnd);
             pNewChildWindow->SetContainer(m_hWndContainer);
             pNewChildWindow->Load(pXmlChild);
             pNewChildWindow->SetAttribute("pos", "0,0,-0,-0", TRUE);

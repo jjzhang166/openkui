@@ -568,7 +568,7 @@ public:
     }
 
 	// add by dummyz@126.com
-	BkStyle& GetStyle()
+	KuiStyle& GetStyle()
 	{
 		return m_style;
 	}
