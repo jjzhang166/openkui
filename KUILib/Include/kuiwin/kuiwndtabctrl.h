@@ -25,9 +25,20 @@ public:
         m_strTitle = lpszTitle;
     }
 
+    BOOL IsHidden()
+    {
+        return m_bHidden;
+    }
+
+    void Hide(BOOL bHide)
+    {
+        m_bHidden = bHide;
+    }
+
 protected:
 
     CString m_strTitle;
+    BOOL m_bHidden;
 
     KUIWIN_DECLARE_ATTRIBUTES_BEGIN()
         KUIWIN_TSTRING_ATTRIBUTE("title", m_strTitle, FALSE)
@@ -162,9 +173,48 @@ public:
         return FALSE;
     }
 
+    BOOL IsPageVisible(int nIndex)
+    {
+        return !GetTab(nIndex)->IsHidden();
+    }
+    BOOL SetPageVisible(int nIndex, BOOL bVisible)
+    {
+        CKuiTab* pTab = GetTab(nIndex);
+        if (!pTab)
+            return FALSE;
+
+        if (pTab->IsHidden() != bVisible)
+            return TRUE;
+
+        pTab->Hide(!bVisible);
+
+        if (!bVisible && m_nCurrentPage == nIndex)
+        {
+            int i = 0;
+            int nPageCount = (int)m_lstPages.GetCount();
+
+            for (i = 0; i < nPageCount; i ++)
+            {
+                if (!GetTab(i)->IsHidden())
+                {
+                    m_nCurrentPage = i;
+                    break;
+                }
+            }
+
+            if (i == nPageCount)
+                m_nCurrentPage = -1;
+        }
+
+        NotifyInvalidate();
+
+        return TRUE;
+    }
+
     BOOL LoadChilds(TiXmlElement* pTiXmlChildElem)
     {
         BOOL bFirstPage = TRUE;
+        int nPage = -1, nFirstShowPage = -1;
 
         KuiSendMessage(WM_DESTROY);
 
@@ -174,16 +224,36 @@ public:
             if (!pNewChildWindow)
                 continue;
 
-            pNewChildWindow->SetParent(m_hKuiWnd);
+            nPage ++;
+
+            pNewChildWindow->SetParent(m_hBkWnd);
             pNewChildWindow->SetContainer(m_hWndContainer);
             pNewChildWindow->Load(pXmlChild);
             pNewChildWindow->SetAttribute("pos", "0,0,-0,-0", TRUE);
+			BOOL bVisible = !pNewChildWindow->IsHidden();
 
-            pNewChildWindow->KuiSendMessage(WM_SHOWWINDOW, bFirstPage);
-            bFirstPage = FALSE;
+            pNewChildWindow->KuiSendMessage(WM_SHOWWINDOW, bFirstPage && bVisible );
 
+
+            if (bFirstPage && bVisible)
+            {
+				nFirstShowPage = nPage;
+				if (0 == m_nCurrentPage)
+					m_nCurrentPage = nPage;
+                bFirstPage = FALSE;
+            }
             m_lstPages.AddTail(pNewChildWindow);
         }
+
+		//如果指定第N个为默认选中TAB，但是第N个被设置了隐藏属性,那么就把第一个具有现实属性的TAB设置为默认的
+		CKuiTab *pNewChildWindow = GetTab(m_nCurrentPage);
+		if (NULL != pNewChildWindow &&
+			TRUE == pNewChildWindow->IsHidden() &&
+			nFirstShowPage >= 0 &&
+			m_nCurrentPage > 0)
+		{//隐藏了
+			m_nCurrentPage = nFirstShowPage;
+		}
 
         return TRUE;
     }
@@ -205,6 +275,24 @@ public:
         }
     }
 
+    int GetVisibleTabCount()
+    {
+        POSITION pos = m_lstPages.GetHeadPosition();
+        int nCount = 0;
+
+        while (pos)
+        {
+            CKuiTab *pKuiWndChild = m_lstPages.GetNext(pos);
+
+            if (pKuiWndChild && !pKuiWndChild->IsHidden())
+            {
+                nCount ++;
+            }
+        }
+
+        return nCount;
+    }
+
     BOOL GetTabItemRect(int nIndex, CRect &rcItem)
     {
         if (nIndex < 0 || nIndex >= (int)m_lstPages.GetCount())
@@ -222,13 +310,26 @@ public:
 
         rcItem.SetRect(m_rcWindow.left, m_rcWindow.top, m_rcWindow.left + size.cx, m_rcWindow.top + size.cy);
 
+        POSITION pos = m_lstPages.GetHeadPosition();
+        int nDrawIndex = 0;
+
+        for (int i = 0; i < nIndex && pos != NULL; i ++)
+        {
+            CKuiTab *pKuiWndChild = m_lstPages.GetNext(pos);
+
+            if (pKuiWndChild && !pKuiWndChild->IsHidden())
+            {
+                nDrawIndex ++;
+            }
+        }
+
         switch (m_nTabAlign)
         {
         case AlignTop:
-            rcItem.OffsetRect(m_nTabPos + (m_nTabWidth + m_nTabSpacing) * nIndex, 0);
+            rcItem.OffsetRect(m_nTabPos + (m_nTabWidth + m_nTabSpacing) * nDrawIndex, 0);
             break;
         case AlignLeft:
-            rcItem.OffsetRect(0, m_nTabPos + (m_nTabHeight + m_nTabSpacing) * nIndex);
+            rcItem.OffsetRect(0, m_nTabPos + (m_nTabHeight + m_nTabSpacing) * nDrawIndex);
             break;
         }
 
@@ -401,12 +502,17 @@ public:
         if (NULL != m_style.m_ftText)
             hFontOld = dc.SelectFont(m_style.m_ftText);
 
+        int nVisibleCount = GetVisibleTabCount();
         for (int i = 0; i < nPageCount; i ++)
         {
+            if (GetTab(i)->IsHidden())
+                continue;
+
             GetTabItemRect(i, rcItem);
 
-            if (m_pSkinSplitter && i != nPageCount - 1)
+            if (m_pSkinSplitter && nVisibleCount > 1)
             {
+                nVisibleCount --;
                 CRect rcDraw;
 
                 switch (m_nTabAlign)
@@ -453,6 +559,9 @@ public:
 
         for (int i = 0; i < nPageCount; i ++)
         {
+            if (GetTab(i)->IsHidden())
+                continue;
+
             if (i != m_nCurrentPage)
                 continue;
 
@@ -529,6 +638,9 @@ public:
 
         for (int i = 0; i < (int)m_lstPages.GetCount(); i ++)
         {
+            if (GetTab(i)->IsHidden())
+                continue;
+
             if (i == m_nCurrentPage)
                 continue;
 
@@ -556,6 +668,9 @@ public:
 
         for (int i = 0; i < (int)m_lstPages.GetCount(); i ++)
         {
+            if (GetTab(i)->IsHidden())
+                continue;
+ 
             if (i == m_nCurrentPage)
                 continue;
 

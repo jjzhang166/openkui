@@ -30,6 +30,13 @@
         return TRUE;                                                        \
     }                                                                       \
 
+#define KUI_NOTIFY_ID_COMMAND_EX(itemidbegin, itemidend, func)					\
+	if (KUINM_COMMAND == uCode && itemidbegin <= ((LPKUINMCOMMAND)pnmh)->uItemID	\
+		&& itemidend >= ((LPKUINMCOMMAND)pnmh)->uItemID )						\
+	{																			\
+		func(((LPKUINMCOMMAND)pnmh)->uItemID);                                   \
+		return TRUE;															\
+	}						
 // void OnKuiCommand(UINT uItemID, LPCSTR szItemClass)
 #define KUI_NOTIFY_COMMAND(func)                                                     \
     if (KUINM_COMMAND == uCode)                                                      \

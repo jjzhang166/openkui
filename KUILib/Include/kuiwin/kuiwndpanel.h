@@ -682,6 +682,14 @@ inline CKuiWindow* CKuiPanel::_CreateKuiWindowByName(LPCSTR lpszName)
     if (pNewWindow)
         return pNewWindow;
 
+	pNewWindow = CBkMemoryImage::CheckAndNew(lpszName);
+	if (pNewWindow)
+		return pNewWindow;
+
+	pNewWindow = CBkImageListHWnd::CheckAndNew(lpszName);
+	if (pNewWindow)
+		return pNewWindow;
+
     return NULL;
 }
 

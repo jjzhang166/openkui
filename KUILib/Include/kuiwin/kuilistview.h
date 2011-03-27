@@ -86,7 +86,8 @@ public:
 
     ~CKuiListViewImpl()
     {
-        m_imgMem.DeleteObject();
+		if(NULL != m_imgMem.m_hBitmap)
+			m_imgMem.DeleteObject();
     }
 
     HWND Create(
@@ -102,7 +103,7 @@ public:
         {
             SetExtendedListViewStyle(LVS_EX_FULLROWSELECT);
 
-            InsertColumn(0, L"", LVCFMT_LEFT, 1);
+            InsertColumn(0, _T(""), LVCFMT_LEFT, 1);
 
             m_kuiListTemplate.SetContainer(m_hWnd);
 
@@ -296,6 +297,11 @@ public:
         return CDRF_SKIPDEFAULT;
     }
 
+	void SetItemHeight(int nHeight)
+	{	
+		_SetItemHeight( nHeight );
+	}
+
 protected:
 
     BOOL SetItemText(int nItem, int nSubItem, LPCTSTR lpszText)
@@ -397,9 +403,13 @@ protected:
         rcClient.MoveToXY(0, 0);
         rcClient.right -= ::GetSystemMetrics(SM_CXVSCROLL);
 
+		ModifyStyle(WS_HSCROLL,0);
+
+		SetColumnWidth(0,rcClient.Width());
+
         m_imgMem.CreateBitmap(rcClient.Width(), m_nItemHeight, RGB(0, 0, 0));
 
-        SetColumnWidth(0, rcClient.Width());
+
 
         WINDOWPOS WndPos = { 0, 0, rcClient.left, rcClient.top, rcClient.Width(), rcClient.Height(), SWP_SHOWWINDOW };
 
@@ -410,6 +420,18 @@ protected:
     {
         _ResizeColumn();
     }
+
+	LRESULT OnNcCalcSize(BOOL bCalcValidRects, LPARAM lParam)
+	{
+		SetMsgHandled(FALSE);
+
+		if ( m_bWhenResizeScrollTop && GetItemCount() > 0 )
+		{
+			Scroll( CSize(0,-65536) );
+		}
+
+		return 0;
+	}
 
     void OnMouseMove(UINT nFlags, CPoint point)
     {
@@ -717,6 +739,7 @@ protected:
         MSG_WM_LBUTTONUP(OnLButtonUp)
         MSG_WM_LBUTTONDBLCLK(OnLButtonDown)
         MSG_WM_SIZE(OnSize)
+		MSG_WM_NCCALCSIZE(OnNcCalcSize)
         MSG_WM_SETCURSOR(OnSetCursor)
         MSG_WM_KEYDOWN(OnKeyDown)
         CHAIN_MSG_MAP_ALT(CCustomDraw<T>, 1)

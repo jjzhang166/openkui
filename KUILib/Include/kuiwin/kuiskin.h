@@ -665,6 +665,7 @@ public:
                     size.cx = m_pImg->GetWidth();
                 else
                     size.cx = m_lSubImageWidth;
+//Bk库没有以下两行
                 if(size.cx>rcDraw.right-rcDraw.left)
                     size.cx = rcDraw.right - rcDraw.left;
                 size.cy = m_pImg->GetHeight();
@@ -700,7 +701,7 @@ public:
 protected:
 
     Gdiplus::Image* m_pImg;
-    CStringA m_strResID;
+    CStringA m_strResID;//Bk库使用整型ID
     LONG m_lSubImageWidth;
 
     KUIWIN_DECLARE_ATTRIBUTES_BEGIN()
