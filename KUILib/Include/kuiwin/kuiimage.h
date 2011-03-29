@@ -18,8 +18,10 @@
 
 #include "../kscbase/kscres.h"
 
-#define abs(value) (value >= 0 ? value : -value)
-#define __in
+#define __in 
+// 原先的定义为：#define abs(value) (value >= 0 ? value : -value)
+// 这个宏定义是有bug的。 但value为 2-3时  实际的代码变为  2-3 >= 0 ? 2-3:-2-3  导致abs取到一个负数
+#define abs(value) (value >= 0 ? value : -(value))
 
 #ifdef __AFXWIN_H__ // If MFC
     #define M_HOBJECT m_hObject
@@ -34,7 +36,14 @@
 
 extern "C" IMAGE_DOS_HEADER __ImageBase;
 
-class CKuiImage : public CBitmapHandle
+class CKuiImage
+#ifndef _KIMAGE_SDK_VER_
+    #ifdef __AFXWIN_H__ // If MFC
+        : public CBitmap
+    #else               // If WTL
+        : public CBitmapHandle
+    #endif
+#endif
 {
 public:
 
@@ -371,6 +380,86 @@ public:
         return bResult;
     }
 
+
+	BOOL Draw2(HDC hDC, int nPosX, int nPosY, int cx, int cy, int nSubImage = -1/* All */)
+	{
+		BOOL bResult = FALSE;
+		int nDrawWidth = 0, nDrawHeight = 0, nSrcPosX = 0, nSrcPosY = 0;
+		HDC hDCDesktop = NULL, hDCSrc = NULL;
+		BITMAP bmp;
+		HGDIOBJ hbmpOld = NULL;
+
+		BLENDFUNCTION fnBlend = {AC_SRC_OVER, 0, 0xFF, AC_SRC_ALPHA};
+
+		if (NULL == M_HOBJECT)
+			goto Exit0;
+
+		if (0 == m_lSubImageWidth && -1 != nSubImage)
+			goto Exit0;
+
+		GetBitmap(&bmp);
+
+		nDrawHeight = cy;
+
+		if (-1 == nSubImage)
+		{
+			nDrawWidth = cx;
+		}
+		else
+		{
+			nDrawWidth = m_lSubImageWidth;
+			nSrcPosX = nSubImage * m_lSubImageWidth;
+		}
+
+		if (ModeAlpha == m_nTransparentMode)
+		{
+			//_PreAlphaBlend((HBITMAP)m_hObject);
+
+			bResult = AlphaBlend(hDC, nPosX, nPosY, nDrawWidth, nDrawHeight, (HBITMAP)M_HOBJECT, nSrcPosX, nSrcPosY);
+
+			goto Exit0;
+		}
+
+		hDCDesktop = ::GetDC(NULL);
+		hDCSrc = ::CreateCompatibleDC(hDCDesktop);
+		::ReleaseDC(NULL, hDCDesktop);
+
+		hbmpOld = ::SelectObject(hDCSrc, M_HOBJECT);
+
+		switch (m_nTransparentMode)
+		{
+		case ModeNone:
+			bResult = ::BitBlt(hDC, nPosX, nPosY, nDrawWidth, nDrawHeight, hDCSrc, nSrcPosX, nSrcPosY, SRCCOPY);
+			break;
+
+		case ModeMaskColor:
+			bResult = TransparentBlt2(hDC, nPosX, nPosY, nDrawWidth, nDrawHeight, hDCSrc, nSrcPosX, nSrcPosY, nDrawWidth, nDrawHeight, m_crMask);
+			break;
+		case ModeAlpha:
+			// API AlphaBlend因为预乘，所以颜色会有所损失，干脆自己写了一个
+			//::AlphaBlend(hDC, nPosX, nPosY, nDrawWidth, nDrawHeight, hDCSrc, nSrcPosX, nSrcPosY, nDrawWidth, nDrawHeight, fnBlend);
+			break;
+
+		default:
+			bResult = FALSE;
+
+			break;
+		}
+
+		::SelectObject(hDCSrc, hbmpOld);
+
+Exit0:
+
+		if (NULL != hDCSrc)
+		{
+			::DeleteDC(hDCSrc);
+			hDCSrc = NULL;
+		}
+
+		return bResult;
+	}
+
+
 	// 小于等于nAlpha的地方为透明，其他地方非透明
 	HRGN	CreateHollyRgn(INT nAlpha)
 	{
@@ -636,8 +725,8 @@ Exit0:
         ::BitBlt(hImageDC, 0, 0, nWidthDest, nHeightDest, hMaskDC, 0, 0, SRCAND);
 
         // 透明部分保持屏幕不变，其它部分变成黑色
-        ::SetBkColor(hdcDest,RGB(255,255,255));
-        ::SetTextColor(hdcDest,RGB(0,0,0));
+        COLORREF crBg = ::SetBkColor(hdcDest, RGB(255, 255, 255));
+        COLORREF crText = ::SetTextColor(hdcDest, RGB(0, 0, 0));
         ::BitBlt(hdcDest, nXOriginDest, nYOriginDest, nWidthDest, nHeightDest, hMaskDC, 0, 0, SRCAND);
 
         // "或"运算,生成最终效果
@@ -650,6 +739,9 @@ Exit0:
         ::DeleteDC(hMaskDC);
         ::DeleteObject(hImageBMP);
         ::DeleteObject(hMaskBMP);
+
+        ::SetBkColor(hdcDest, crBg);
+        ::SetTextColor(hdcDest, crText);
 
         return TRUE;
     }

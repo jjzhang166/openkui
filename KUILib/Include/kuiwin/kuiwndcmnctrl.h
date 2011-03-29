@@ -13,6 +13,74 @@
 #include "kuiwndnotify.h"
 
 //////////////////////////////////////////////////////////////////////////
+// Memory gdiplus Image Draw
+//
+// Usage: <memimage mempointer=xx />
+//
+class CKuiMemoryImage : public CKuiWindow
+{
+	KUIOBJ_DECLARE_CLASS_NAME(CKuiMemoryImage, "memimage")
+
+		CKuiMemoryImage()
+	{
+		m_gdiPlusImage = NULL;
+		m_nAutoSize = 1;
+	}
+public:
+
+	// Do nothing
+	void OnPaint(CDCHandle dc)
+	{
+		if (m_gdiPlusImage==NULL)
+			return;
+
+
+		if (1 == m_nAutoSize)
+		{
+			Gdiplus::Graphics	gh(dc.m_hDC);
+			gh.DrawImage( m_gdiPlusImage, Gdiplus::Rect(m_rcWindow.left,m_rcWindow.top,m_rcWindow.Width(),m_rcWindow.Height()),
+				0,0, m_gdiPlusImage->GetWidth(), m_gdiPlusImage->GetHeight(), Gdiplus::UnitPixel );
+		}else if (0 == m_nAutoSize)
+		{
+			Gdiplus::Graphics	gh(dc.m_hDC);
+			int nWidth = m_gdiPlusImage->GetWidth(),
+				nHeight = m_gdiPlusImage->GetHeight();
+
+			gh.DrawImage(m_gdiPlusImage, m_rcWindow.left,m_rcWindow.top);
+		}
+
+	}
+
+	HRESULT OnAttributeChange(CStringA& strValue, BOOL bLoading)
+	{
+		m_gdiPlusImage = (Gdiplus::Image*)IntToPtr(atoi( strValue ));
+		//m_hIcon = (HICON)IntToPtr(atoi(strValue));
+		return S_OK;
+	}
+
+	HRESULT OnDrawImageSize(CStringA& strValue, BOOL bLoading)
+	{
+		if (FALSE == strValue.IsEmpty())
+			m_nAutoSize = StrToIntA(strValue);
+		return S_OK;
+	}
+
+protected:
+		KUIWIN_BEGIN_MSG_MAP()
+		MSG_WM_PAINT(OnPaint)
+		KUIWIN_END_MSG_MAP()
+
+		KUIWIN_DECLARE_ATTRIBUTES_BEGIN()
+		KUIWIN_CUSTOM_ATTRIBUTE("mempointer", OnAttributeChange)
+		KUIWIN_CUSTOM_ATTRIBUTE("autosize",   OnDrawImageSize)
+		KUIWIN_DECLARE_ATTRIBUTES_END()
+
+protected:
+	Gdiplus::Image*	m_gdiPlusImage;
+	int			m_nAutoSize;//是否根据给定的矩形区域自适应大小，默认自适应，0表示根据IMAGE的实际大小绘制
+};
+
+//////////////////////////////////////////////////////////////////////////
 // Spacing Control
 // Only leave a space, faster than "div" (... a little)
 //
@@ -513,8 +581,10 @@ public:
 
     void OnDestroy()
     {
-        ::ShowWindow(_GetRealWindow(), SW_HIDE);
-    }
+		HWND hWndReal = _GetRealWindow();
+		if (hWndReal && ::IsWindow(hWndReal))
+			::ShowWindow(hWndReal, SW_HIDE);
+	}
 
     // Do nothing
     void OnPaint(CDCHandle dc)
@@ -952,3 +1022,196 @@ protected:
         MSG_WM_LBUTTONUP(OnLButtonUp)
     KUIWIN_END_MSG_MAP()
 };
+
+//////////////////////////////////////////////////////////////////////////
+// ImageListH Control add by zbl
+// Use src attribute specify a resource id
+// 
+// Usage: <imglisth src=xx />
+//
+class CKuiImageListHWnd : public CKuiWindow
+{
+	KUIOBJ_DECLARE_CLASS_NAME(CKuiImageListHWnd, "imglisth")
+public:
+	CKuiImageListHWnd()
+		: m_nSubImageID(-1)
+		, m_pSkin(NULL)
+		, m_nImageCount(0)
+	{
+		m_mapSkin.RemoveAll();
+		m_mapSkinSub.RemoveAll();
+	}
+
+	virtual BOOL Load(TiXmlElement* pTiXmlElem)
+	{
+		if (!CKuiWindow::Load(pTiXmlElem))
+			return FALSE;
+
+		CStringA strSkin, strSkinValue;
+		for (int i = 0; i < m_nImageCount; i++)
+		{
+			strSkin.Format("skin%d", i);
+			m_mapSkin[strSkin] = NULL;
+			//
+			strSkin.Format("sub%d", i);
+			m_mapSkinSub[strSkin] = -1;
+		}
+
+		for (TiXmlAttribute *pAttrib = pTiXmlElem->FirstAttribute(); NULL != pAttrib; pAttrib = pAttrib->Next())
+		{
+			strSkin = pAttrib->Name();
+			if (0 == strSkin.CompareNoCase("skinlist"))
+			{
+				MapSkinList(pAttrib->Value());
+			}else if (0 == strSkin.CompareNoCase("sublist"))
+			{
+				MapSkinSubList(pAttrib->Value());
+			}
+
+		}
+
+		return TRUE;
+	}
+
+	void OnPaint(CDCHandle dc)
+	{
+		CRect rc = m_rcWindow;
+		CStringA strKey = "";
+		for (int i = 0; i < m_nImageCount; i++)
+		{
+			CKuiSkinBase* pSkin = NULL;
+			strKey.Format("skin%d", i);
+			pSkin = m_mapSkin[strKey];
+			if (NULL != pSkin)
+			{
+				strKey.Format("sub%d", i);
+				pSkin->Draw(dc, rc, m_mapSkinSub[strKey]);
+				SIZE size = pSkin->GetSkinSize();
+				rc.OffsetRect(size.cx, 0);
+			}
+		}
+	}
+
+	LRESULT OnNcCalcSize(BOOL bCalcValidRects, LPARAM lParam)
+	{
+		__super::OnNcCalcSize(bCalcValidRects, lParam);
+
+		LPSIZE pSize = (LPSIZE)lParam;
+
+		if (m_pSkin)
+		{
+			SIZE sizeImage;
+			sizeImage = m_pSkin->GetSkinSize();
+
+			if (sizeImage.cx)
+				pSize->cx = sizeImage.cx;
+			if (sizeImage.cy)
+				pSize->cy = sizeImage.cy;
+
+			return TRUE;
+		}
+
+		return 0;
+	}
+
+	void InitSkinList(CStringA SkinList, CSimpleArray<CStringA>& arrList)
+	{
+		CStringA strList = SkinList, strTmp;
+		arrList.RemoveAll();
+		strList.Append(",");
+		int nIndex = -1;
+		nIndex = strList.Find(",");
+		while(nIndex >= 0)
+		{
+			strTmp = strList.Left(nIndex);
+			if (strTmp.GetLength() > 0)
+				arrList.Add(strTmp);
+			strList = strList.Mid(nIndex+1);
+			nIndex = strList.Find(",");
+		}
+	}
+
+	void MapSkinList(CStringA strList)
+	{
+		CSimpleArray<CStringA> arrList;
+		InitSkinList(strList, arrList);
+		CStringA strSkinValue;
+		for (int i = 0; i < arrList.GetSize(); i++)
+		{
+			CStringA strSkin = arrList[i];
+			int nIndex = strSkin.Find("=");
+			if (nIndex > 0)
+			{
+				strSkin = strSkin.Left(nIndex);
+				strSkinValue = arrList[i].Mid(nIndex+1);
+				m_mapSkin[strSkin] = KuiSkin::GetSkin(strSkinValue);
+			}
+		}
+	}
+
+	void MapSkinSubList(CStringA strList)
+	{
+		CSimpleArray<CStringA> arrList;
+		InitSkinList(strList, arrList);
+		CStringA strSkinValue;
+		for (int i = 0; i < arrList.GetSize(); i++)
+		{
+			CStringA strSkin = arrList[i];
+			int nIndex = strSkin.Find("=");
+			if (nIndex > 0)
+			{
+				strSkin = strSkin.Left(nIndex);
+				strSkinValue = arrList[i].Mid(nIndex+1);
+				m_mapSkinSub[strSkin] = StrToIntA(strSkinValue);
+
+			}
+		}
+	}
+	HRESULT OnAttributeSkinListChange(CStringA& strValue, BOOL bLoading)
+	{//skin0="img0",skin1="img1",skin2="img2"
+		if (FALSE == strValue.IsEmpty())
+		{
+			m_strSkinList = strValue;
+			MapSkinList(m_strSkinList);
+		}
+
+		return TRUE;
+	}
+
+	HRESULT OnAttributeSubSinListChange(CStringA& strValue, BOOL bLoading)
+	{//skin0sub="0",skin1sub="1",skin2sub="2"
+		if (FALSE == strValue.IsEmpty())
+		{
+			m_strSubList = strValue;
+			
+			MapSkinSubList(m_strSubList);
+		}
+
+		return TRUE;
+	}
+
+protected:
+	int m_nSubImageID;
+	CKuiSkinBase *m_pSkin;
+	//
+	int m_nImageCount;
+	CStringA m_strSkinList;
+	CStringA m_strSubList;
+	//CSimpleMap<CStringA, CKuiSkinBase*>	m_mapSkin;
+	CAtlMap<CStringA, int>				m_mapSkinSub;
+	CAtlMap<CStringA, CKuiSkinBase*>		m_mapSkin;
+
+	KUIWIN_DECLARE_ATTRIBUTES_BEGIN()
+		KUIWIN_SKIN_ATTRIBUTE("skin", m_pSkin, TRUE)
+		KUIWIN_INT_ATTRIBUTE("sub", m_nSubImageID, FALSE)
+		KUIWIN_INT_ATTRIBUTE("imagecount", m_nImageCount, FALSE)
+		KUIWIN_CUSTOM_ATTRIBUTE("skinlist", OnAttributeSkinListChange)
+		KUIWIN_CUSTOM_ATTRIBUTE("sublist", OnAttributeSubSinListChange)
+		KUIWIN_DECLARE_ATTRIBUTES_END()
+
+		KUIWIN_BEGIN_MSG_MAP()
+		MSG_WM_PAINT(OnPaint)
+		MSG_WM_NCCALCSIZE(OnNcCalcSize)
+		KUIWIN_END_MSG_MAP()
+};
+//Bk库还加了一个ICON文件绘制的控件觉得没必要,没有加

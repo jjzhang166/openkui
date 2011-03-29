@@ -342,6 +342,7 @@ protected:
     CString m_strToolTipText;
 
     KUIDLG_POSITION m_dlgpos;
+//Bk库定义了IBkWindowPaintHook* m_pPaintHook;用来进行绘制挂钩
 
 public:
 
@@ -566,6 +567,11 @@ public:
         return m_bTransparent;
     }
 
+	// add by dummyz@126.com
+	KuiStyle& GetStyle()
+	{
+		return m_style;
+	}
 public:
 
     //////////////////////////////////////////////////////////////////////////

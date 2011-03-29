@@ -11,6 +11,7 @@
 #include "../KUILib/include/kuihead.h"
 #include "../KUILib/include/kuiwin/kuiwnd.h"
 #include "../KUILib/Include/KuiApp.h"
+#include "../KuiLib/Include/wtlhelper/whwindow.h"
 
 #ifdef _DEBUG
 #pragma comment(lib,"../../KUILib/lib/kscbaseD.lib")

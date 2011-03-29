@@ -64,6 +64,7 @@ protected:
     int             m_nHoverItem;
     int             m_nPushItem;
     int             m_nLastDrawItem;
+	BOOL			m_bWhenResizeScrollTop;
 
     // Tracking flag
     BOOL            m_bTrackFlag;
@@ -81,12 +82,14 @@ public:
         , m_nHoverItem(-1)
         , m_nPushItem(-1)
         , m_nLastDrawItem(-1)
+		, m_bWhenResizeScrollTop(FALSE)
     {
     }
 
     ~CKuiListViewImpl()
     {
-        m_imgMem.DeleteObject();
+		if(NULL != m_imgMem.m_hBitmap)
+			m_imgMem.DeleteObject();
     }
 
     HWND Create(
@@ -102,7 +105,7 @@ public:
         {
             SetExtendedListViewStyle(LVS_EX_FULLROWSELECT);
 
-            InsertColumn(0, L"", LVCFMT_LEFT, 1);
+            InsertColumn(0, _T(""), LVCFMT_LEFT, 1);
 
             m_kuiListTemplate.SetContainer(m_hWnd);
 
@@ -209,6 +212,11 @@ public:
         return CKuiViewImpl<T>::SetItemText(uItemID, lpszText);
     }
 
+	VOID SetWhenResizeScrollToTop( BOOL bAutoTop )
+	{
+		m_bWhenResizeScrollTop = bAutoTop;
+	}
+
 //     BOOL SetItemCount(int nItems)
 //     {
 //         SetColumnWidth(0, 1);
@@ -295,6 +303,11 @@ public:
 
         return CDRF_SKIPDEFAULT;
     }
+
+	void SetItemHeight(int nHeight)
+	{	
+		_SetItemHeight( nHeight );
+	}
 
 protected:
 
@@ -397,19 +410,34 @@ protected:
         rcClient.MoveToXY(0, 0);
         rcClient.right -= ::GetSystemMetrics(SM_CXVSCROLL);
 
-        m_imgMem.CreateBitmap(rcClient.Width(), m_nItemHeight, RGB(0, 0, 0));
+		ModifyStyle(WS_HSCROLL,0);
 
-        SetColumnWidth(0, rcClient.Width());
+		SetColumnWidth(0,rcClient.Width());
+
+        m_imgMem.CreateBitmap(rcClient.Width(), m_nItemHeight, RGB(0, 0, 0));
 
         WINDOWPOS WndPos = { 0, 0, rcClient.left, rcClient.top, rcClient.Width(), rcClient.Height(), SWP_SHOWWINDOW };
 
         m_kuiListTemplate.KuiSendMessage(WM_WINDOWPOSCHANGED, 0, (LPARAM)&WndPos);
+
     }
 
     void OnSize(UINT nType, CSize /*size*/)
     {
         _ResizeColumn();
     }
+
+	LRESULT OnNcCalcSize(BOOL bCalcValidRects, LPARAM lParam)
+	{
+		SetMsgHandled(FALSE);
+
+		if ( m_bWhenResizeScrollTop && GetItemCount() > 0 )
+		{
+			Scroll( CSize(0,-65536) );
+		}
+
+		return 0;
+	}
 
     void OnMouseMove(UINT nFlags, CPoint point)
     {
@@ -717,6 +745,7 @@ protected:
         MSG_WM_LBUTTONUP(OnLButtonUp)
         MSG_WM_LBUTTONDBLCLK(OnLButtonDown)
         MSG_WM_SIZE(OnSize)
+		MSG_WM_NCCALCSIZE(OnNcCalcSize)
         MSG_WM_SETCURSOR(OnSetCursor)
         MSG_WM_KEYDOWN(OnKeyDown)
         CHAIN_MSG_MAP_ALT(CCustomDraw<T>, 1)
