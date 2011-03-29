@@ -16,7 +16,8 @@ public:
 		DWORD dwRet = 1;
 		HRESULT hRet;
 		CRegKey reg;
-		hRet = __super::Init(NULL, hInstance);
+		GUID guid;
+		hRet = __super::Init(NULL, hInstance, &guid);
 		if (FAILED(hRet))
 			return hRet;
 		

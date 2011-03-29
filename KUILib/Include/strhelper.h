@@ -8,5 +8,12 @@
 #ifdef CA2T
 #undef CA2T
 #endif
-	#define CA2T(x,code) CString( CA2W(x, code) )
+
+#ifdef CT2A
+#undef CT2A
 #endif
+
+	#define CA2T(x,code) CString( CA2W(x, code) )
+	#define CT2A(x,code) CW2A(CStringW(x), code )
+#endif
+

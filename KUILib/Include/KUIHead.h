@@ -35,6 +35,7 @@
 #include <atltime.h>
 
 #include "kuiwin/kuilistview.h"
+#include "kuiwin/realwnd/KuiRealHead.h"
 #include "wtlhelper/whwindow.h"
 
 #include <Shlwapi.h>
