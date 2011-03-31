@@ -355,7 +355,7 @@ void DrawStart( HDC hDC )
 	DrawBack( hDC );
 	TCHAR pText[128];
 	_tcscpy( pText, _T("Ã∞≥‘…ﬂ V1.0") );
-	DrawText( hDC, pText, _tcslen( pText ), &g_rtGame, DT_SINGLELINE | DT_VCENTER | DT_CENTER );
+	DrawText( hDC, pText, (int)_tcslen( pText ), &g_rtGame, DT_SINGLELINE | DT_VCENTER | DT_CENTER );
 }
 
 void DrawEnd( HDC hDC )
@@ -364,7 +364,7 @@ void DrawEnd( HDC hDC )
 
 	TCHAR pText[128];
 	_tcscpy( pText, _T("”Œœ∑Ω· ¯") );
-	DrawText( hDC, pText, _tcslen( pText ), &g_rtGame, DT_SINGLELINE | DT_VCENTER | DT_CENTER );
+	DrawText( hDC, pText, (int)_tcslen( pText ), &g_rtGame, DT_SINGLELINE | DT_VCENTER | DT_CENTER );
 }
 
 void DrawBack( HDC hDC )

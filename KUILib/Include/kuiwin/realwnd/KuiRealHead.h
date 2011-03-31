@@ -8,4 +8,5 @@
 
 #include "KuiRealListCtrl.h"
 #include "kuimsgbox.h"
+#include "KuiRealTreeCtrl.h"
 #endif

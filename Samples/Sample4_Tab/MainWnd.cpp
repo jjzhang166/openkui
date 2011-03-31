@@ -58,6 +58,33 @@ LRESULT CMainWnd::OnInitDialog( HWND hDlg, LPARAM lParam )
 	{
 		m_ctlWeb.Show2( _T("http://www.baidu.com/"), _T("about:blank") );
 	}
+	if( !m_ctlTree.Create( GetViewHWND(), 501 ) )
+	{
+		CKuiMsgBox::Show( _T("无法初始化树控件") );
+	}
+	else
+	{
+		HTREEITEM hItem = m_ctlTree.InsertItem( _T("全选集"), NULL, NULL, KUIMulStatusTree::EM_TVIS_CHECK );
+		m_ctlTree.InsertItem( _T("下属项目1"), hItem, NULL, KUIMulStatusTree::EM_TVIS_CHECK );
+		m_ctlTree.InsertItem( _T("下属项目2"), hItem, NULL, KUIMulStatusTree::EM_TVIS_CHECK );
+		m_ctlTree.InsertItem( _T("下属项目3"), hItem, NULL, KUIMulStatusTree::EM_TVIS_CHECK );
+		m_ctlTree.InsertItem( _T("下属项目4"), hItem, NULL, KUIMulStatusTree::EM_TVIS_CHECK );
+		m_ctlTree.InsertItem( _T("下属项目5"), hItem, NULL, KUIMulStatusTree::EM_TVIS_CHECK );
+
+		hItem = m_ctlTree.InsertItem( _T("半选集"), NULL, NULL, KUIMulStatusTree::EM_TVIS_UNCHECK );
+		m_ctlTree.InsertItem( _T("下属项目1"), hItem, NULL, KUIMulStatusTree::EM_TVIS_CHECK );
+		m_ctlTree.InsertItem( _T("下属项目2"), hItem, NULL, KUIMulStatusTree::EM_TVIS_UNCHECK );
+		m_ctlTree.InsertItem( _T("下属项目3"), hItem, NULL, KUIMulStatusTree::EM_TVIS_CHECK );
+		m_ctlTree.InsertItem( _T("下属项目4"), hItem, NULL, KUIMulStatusTree::EM_TVIS_UNCHECK );
+		m_ctlTree.InsertItem( _T("下属项目5"), hItem, NULL, KUIMulStatusTree::EM_TVIS_UNCHECK );
+
+		hItem = m_ctlTree.InsertItem( _T("全非选集"), NULL, NULL, KUIMulStatusTree::EM_TVIS_UNCHECK );
+		m_ctlTree.InsertItem( _T("下属项目1"), hItem, NULL, KUIMulStatusTree::EM_TVIS_UNCHECK );
+		m_ctlTree.InsertItem( _T("下属项目2"), hItem, NULL, KUIMulStatusTree::EM_TVIS_UNCHECK );
+		m_ctlTree.InsertItem( _T("下属项目3"), hItem, NULL, KUIMulStatusTree::EM_TVIS_UNCHECK );
+		m_ctlTree.InsertItem( _T("下属项目4"), hItem, NULL, KUIMulStatusTree::EM_TVIS_UNCHECK );
+		m_ctlTree.InsertItem( _T("下属项目5"), hItem, NULL, KUIMulStatusTree::EM_TVIS_UNCHECK );
+	}
 	return TRUE;
 }
 

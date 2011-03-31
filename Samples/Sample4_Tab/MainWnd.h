@@ -49,6 +49,7 @@ protected:
 	CKuiRealListCtrl		m_ctlListCtrl;
 	CSnakeWnd				m_SnakeGame;
 	CWHHtmlContainerWindow	m_ctlWeb;
+	KUIMulStatusTree		m_ctlTree;
 };
 
 extern CMainWnd *g_pMainWnd;
