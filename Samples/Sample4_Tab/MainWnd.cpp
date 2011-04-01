@@ -85,6 +85,8 @@ LRESULT CMainWnd::OnInitDialog( HWND hDlg, LPARAM lParam )
 		m_ctlTree.InsertItem( _T("下属项目4"), hItem, NULL, KUIMulStatusTree::EM_TVIS_UNCHECK );
 		m_ctlTree.InsertItem( _T("下属项目5"), hItem, NULL, KUIMulStatusTree::EM_TVIS_UNCHECK );
 	}
+
+	CenterWindow();
 	return TRUE;
 }
 
@@ -110,6 +112,35 @@ void CMainWnd::OnBkBtnMax()
 	{
 		SendMessage(WM_SYSCOMMAND, SC_MAXIMIZE | HTCAPTION, 0);
 	}
+}
+
+void CMainWnd::OnSysCommand(WPARAM wParam, CPoint pt )
+{
+	SetMsgHandled(FALSE);
+
+	switch (wParam & 0xFFF0)
+	{
+	case SC_CLOSE:
+		SetMsgHandled(TRUE);
+		DestroyWindow();
+		break;
+	case SC_RESTORE:
+		{
+			DWORD dwStyle = GetStyle();
+			if (WS_MINIMIZE == (dwStyle & WS_MINIMIZE))
+				break;
+
+			if (WS_MAXIMIZE == (dwStyle & WS_MAXIMIZE))
+			{
+				SetItemAttribute(IDC_BTN_SYS_MAX, "skin", "maxbtn");
+				break;
+			}
+		}
+	case SC_MAXIMIZE:
+		SetItemAttribute(IDC_BTN_SYS_MAX, "skin", "restorebtn");
+		break;
+	}
+	
 }
 
 void CMainWnd::OnBkBtnMin()

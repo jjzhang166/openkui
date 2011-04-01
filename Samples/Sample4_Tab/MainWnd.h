@@ -21,6 +21,7 @@ public:
 
 	void OnStartGame();
 	void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
+	void OnSysCommand(WPARAM wParam, CPoint pt );
 
 	void OnTimer(UINT_PTR nIDEvent);   // ¶¯»­¶¨Ê±Æ÷
 
@@ -42,7 +43,7 @@ public:
 		MSG_WM_INITDIALOG(OnInitDialog)
 		//MSG_WM_SYSCOMMAND(OnSysCommand)
 		MSG_WM_DESTROY(OnDestroy)
-		
+		MSG_WM_SYSCOMMAND(OnSysCommand)
 		REFLECT_NOTIFICATIONS_EX()
 	END_MSG_MAP()
 protected:

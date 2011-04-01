@@ -152,6 +152,17 @@ public:
         return TRUE;
     }
 
+	CString GetItemText(UINT uItemID)
+	{
+		T* pT = static_cast<T*>(this);
+		CKuiWindow *pWnd = pT->FindChildByCmdID(uItemID);
+
+		if (pWnd)
+			return 	pWnd->GetInnerText();
+
+		return _T("");
+	}
+
     BOOL SetItemText(UINT uItemID, LPCTSTR lpszText)
     {
         T* pT = static_cast<T*>(this);
@@ -377,6 +388,34 @@ public:
             return -1;
 
         return ((CKuiTabCtrl *)pWnd)->GetCurSel();
+    }
+
+    BOOL IsTabPageVisible(UINT uItemID, int nPage)
+    {
+        T* pT = static_cast<T*>(this);
+        CKuiWindow *pWnd = pT->FindChildByCmdID(uItemID);
+        if (!pWnd)
+            return FALSE;
+
+        if (!pWnd->IsClass(CKuiTabCtrl::GetClassName()))
+            return FALSE;
+
+        return ((CKuiTabCtrl *)pWnd)->IsPageVisible(nPage);
+    }
+
+    BOOL SetTabPageVisible(UINT uItemID, int nPage, BOOL bVisible)
+    {
+        T* pT = static_cast<T*>(this);
+        CKuiWindow *pWnd = pT->FindChildByCmdID(uItemID);
+        if (!pWnd)
+            return FALSE;
+
+        if (!pWnd->IsClass(CKuiTabCtrl::GetClassName()))
+            return FALSE;
+
+        ((CKuiTabCtrl *)pWnd)->SetPageVisible(nPage, bVisible);
+
+        return TRUE;
     }
 
     BOOL SetItemIconHandle(UINT uItemID, HICON hIcon)
@@ -621,6 +660,17 @@ public:
             {
                 m_bCanMaximize = TRUE;
                 m_dwDlgStyle |= WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_THICKFRAME;
+
+
+				BOOL bValueT = FALSE;
+				pXmlRootElem->Attribute("nomaxsize", &bValueT);
+
+				if (bValueT)
+				{
+					m_bCanMaximize = FALSE;
+					m_dwDlgStyle &= ~WS_MAXIMIZEBOX;
+				}
+
             }
             else
                 m_bCanMaximize = FALSE;
@@ -1282,6 +1332,8 @@ protected:
         REFLECT_NOTIFY_CODE(NM_CUSTOMDRAW)
         MESSAGE_HANDLER_EX(WM_NOTIFY, OnChildNotify)
         MESSAGE_HANDLER_EX(WM_COMMAND, OnChildNotify)
+        MESSAGE_HANDLER_EX(WM_VSCROLL, OnChildNotify)
+        MESSAGE_HANDLER_EX(WM_HSCROLL, OnChildNotify)
         REFLECT_NOTIFICATIONS_EX()
     END_MSG_MAP()
 };
@@ -1534,6 +1586,11 @@ public:
         return m_richView.SetItemText(uItemID, lpszText);
     }
 
+	CString GetItemText(UINT uItemID)
+	{
+		return m_richView.GetItemText(uItemID);
+	}
+
     BOOL FormatItemText(UINT uItemID, LPCTSTR lpszFormat, ...)
     {
         va_list args;
@@ -1623,6 +1680,16 @@ public:
     BOOL SetTabTitle(UINT uItemID, int nPage, LPCTSTR lpszTitle)
     {
         return m_richView.SetTabTitle(uItemID, nPage, lpszTitle);
+    }
+
+    BOOL IsTabPageVisible(UINT uItemID, int nPage)
+    {
+        return m_richView.IsTabPageVisible(uItemID, nPage);
+    }
+
+    BOOL SetTabPageVisible(UINT uItemID, int nPage, BOOL bVisible)
+    {
+        return m_richView.SetTabPageVisible(uItemID, nPage, bVisible);
     }
 
     BOOL SetItemIconHandle(UINT uItemID, HICON hIcon)
@@ -1737,9 +1804,13 @@ public:
 
         // From MFC
         // hide the window before enabling the parent, etc.
-        SetWindowPos(
-            NULL, 0, 0, 0, 0,
+
+		if ( IsWindow() )
+		{
+			SetWindowPos(
+            NULL, 0, 0, 0, 0, 
             SWP_HIDEWINDOW | SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE | SWP_NOZORDER);
+		}
 
         if (bEnableParent)
         {
@@ -1751,7 +1822,8 @@ public:
 
         KuiWinManager::SetActive(hWndLastActive);
 
-        DestroyWindow();
+		if ( IsWindow() )
+	        DestroyWindow();
 
         return m_uRetCode;
     }
