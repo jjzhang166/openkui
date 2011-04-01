@@ -1261,6 +1261,29 @@ protected:
         }
     }
 
+	// Bill Add SysMenu
+	void OnRButtonDown(UINT nFlags, CPoint point)
+    {
+        HKUIWND hKuiWndHitTest = m_kuiHeader.KuiGetHWNDFromPoint(point, TRUE);
+
+        if (hKuiWndHitTest)
+        {
+            CKuiWindow* pWndPushDown = KuiWnds::GetWindow(hKuiWndHitTest);
+
+            if ( pWndPushDown->IsClass("icon") )
+            {
+                CWindow &wndParent = GetParent();
+				ClientToScreen( &point );
+				UINT nID = TrackPopupMenu( wndParent.GetSystemMenu(FALSE), TPM_TOPALIGN | TPM_LEFTBUTTON | TPM_RETURNCMD, point.x, point.y, 0, wndParent.m_hWnd, NULL );
+				if( nID > 0 )
+					wndParent.SendMessage(WM_SYSCOMMAND, nID );
+
+                return;
+            }
+        }
+
+    }
+
     BOOL OnSetCursor(CWindow /*wnd*/, UINT nHitTest, UINT message)
     {
         if (m_hKuiWndHover)
@@ -1326,6 +1349,7 @@ protected:
         MSG_WM_LBUTTONDOWN(OnLButtonDown)
         MSG_WM_LBUTTONUP(OnLButtonUp)
         MSG_WM_LBUTTONDBLCLK(OnLButtonDblClk)
+		MSG_WM_RBUTTONDOWN(OnRButtonDown)
         MSG_WM_SETCURSOR(OnSetCursor)
         MSG_WM_MOUSEWHEEL(OnMouseWheel)
         NOTIFY_CODE_HANDLER_EX(KUIINM_INVALIDATERECT, OnKUIINMInvalidateRect)
