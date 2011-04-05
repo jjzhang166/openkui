@@ -7,11 +7,12 @@
 #include "stdafx.h"
 #include "CSnakeDlg.h"
 class CMainWnd : public CKuiDialogImpl<CMainWnd>
-	, public CWHRoundRectFrameHelper<CMainWnd>
+	, public CWHSizeableRoundRect<CMainWnd>
 {
 public:
 	CMainWnd(void);
 	virtual ~CMainWnd(void);
+	LRESULT OnCreate(LPCREATESTRUCT lpCreateStruct);
 	LRESULT OnInitDialog( HWND hDlg, LPARAM lParam );
 	void OnDestroy();
 
@@ -36,10 +37,11 @@ public:
 	BEGIN_MSG_MAP_EX(CMainWnd)
 		MSG_KUI_NOTIFY(IDC_RICHVIEW_WIN)
 		CHAIN_MSG_MAP(CKuiDialogImpl<CMainWnd>)
-		CHAIN_MSG_MAP(CWHRoundRectFrameHelper<CMainWnd>)
+		CHAIN_MSG_MAP(CWHSizeableRoundRect<CMainWnd>)
 		
 		MSG_WM_KEYDOWN(OnKeyDown)
 
+		MSG_WM_CREATE(OnCreate)
 		MSG_WM_INITDIALOG(OnInitDialog)
 		//MSG_WM_SYSCOMMAND(OnSysCommand)
 		MSG_WM_DESTROY(OnDestroy)

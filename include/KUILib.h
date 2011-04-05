@@ -13,10 +13,14 @@
 #include "../KUILib/Include/KuiApp.h"
 #include "../KuiLib/Include/wtlhelper/whwindow.h"
 
+#include "../KuiLib/Include/wtlhelper/billext/extentwindow.h"
+
+#define LIBPATH(p,f) p##f 
+
 #ifdef _DEBUG
-#pragma comment(lib,"../../KUILib/lib/kscbaseD.lib")
+#pragma comment(lib,LIBPATH(__FILE__, ".dir/../../KUILib/lib/kscbaseD.lib") )
 #else
-#pragma comment(lib,"../../KUILib/lib/kscbase.lib")
+#pragma comment(lib,LIBPATH(__FILE__, ".dir/../../KUILib/lib/kscbase.lib") )
 #endif
 #pragma comment(lib,"gdiplus.lib")
 

@@ -15,6 +15,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sample4_Tab", "Samples\Samp
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KuiDesigner", "KuiDesigner\KuiDesigner.vcproj", "{B60B6F57-9310-4260-AC6A-F04D75D92ADB}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
@@ -37,6 +41,10 @@ Global
 		{DAE70133-62AB-4D8E-BDAF-E841CA710413}.Debug.Build.0 = Debug|Win32
 		{DAE70133-62AB-4D8E-BDAF-E841CA710413}.Release.ActiveCfg = Release|Win32
 		{DAE70133-62AB-4D8E-BDAF-E841CA710413}.Release.Build.0 = Release|Win32
+		{B60B6F57-9310-4260-AC6A-F04D75D92ADB}.Debug.ActiveCfg = Debug|Win32
+		{B60B6F57-9310-4260-AC6A-F04D75D92ADB}.Debug.Build.0 = Debug|Win32
+		{B60B6F57-9310-4260-AC6A-F04D75D92ADB}.Release.ActiveCfg = Release|Win32
+		{B60B6F57-9310-4260-AC6A-F04D75D92ADB}.Release.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection

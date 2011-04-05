@@ -17,6 +17,12 @@ CMainWnd::~CMainWnd(void)
 {
 }
 
+LRESULT CMainWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
+{
+	
+	return TRUE;
+}
+
 LRESULT CMainWnd::OnInitDialog( HWND hDlg, LPARAM lParam )
 {
 	DWORD dwStyle = WS_CHILD|LVS_REPORT|LVS_SHOWSELALWAYS|LVS_SINGLESEL|LVS_OWNERDRAWFIXED;

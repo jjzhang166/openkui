@@ -1134,6 +1134,13 @@ protected:
     {
         HKUIWND hKuiWndHitTest = m_kuiHeader.KuiGetHWNDFromPoint(point, TRUE);
 
+		// Bill implement sizeable.
+		if( m_dwDlgStyle & WS_THICKFRAME )
+		{
+			GetParent().SendMessage( WM_LBUTTONDOWN, nFlags, MAKELPARAM( point.x, point.y ) );
+			SetCapture();
+			ReleaseCapture();
+		}
         if (hKuiWndHitTest)
         {
             CKuiWindow* pWndPushDown = KuiWnds::GetWindow(hKuiWndHitTest);
@@ -1284,9 +1291,16 @@ protected:
 
     }
 
-    BOOL OnSetCursor(CWindow /*wnd*/, UINT nHitTest, UINT message)
+    BOOL OnSetCursor( HWND hWnd, UINT nHitTest, UINT message)
     {
-        if (m_hKuiWndHover)
+        // Bill implement sizeable.
+		if( m_dwDlgStyle & WS_THICKFRAME )
+		{
+			if( GetParent().SendMessage( WM_SETCURSOR, (WPARAM)hWnd, MAKELPARAM( nHitTest, message ) ) )
+				return TRUE;
+		}
+
+		if (m_hKuiWndHover)
         {
             CKuiWindow *pKuiWndHover = KuiWnds::GetWindow(m_hKuiWndHover);
 
@@ -1298,7 +1312,7 @@ protected:
         }
 
         ::SetCursor(::LoadCursor(NULL, MAKEINTRESOURCE(IDC_ARROW)));
-
+		
         return TRUE;
     }
 
@@ -1539,7 +1553,6 @@ protected:
     {
         return TRUE;
     }
-
 public:
 
 	BOOL Load(const std::string& strResID)
@@ -1748,7 +1761,12 @@ public:
         if (_T('\0') == lpszCaption[0])
             lpszCaption = NULL;
 
-        if (rect)
+		SIZE sizeDefault = m_richView.GetDefaultSize();
+        if (sizeDefault.cx && sizeDefault.cy)
+        {
+			rcWnd.SetRect( 0, 0, sizeDefault.cx-1, sizeDefault.cy-1 );
+        }
+        else if (rect)
             rcWnd = rect;
 
         HWND hWnd = __super::Create(hWndParent, rcWnd, lpszCaption, m_richView.GetDlgStyle(), m_richView.GetDlgExStyle());
@@ -1767,13 +1785,11 @@ public:
 
         m_bShowWindow = TRUE;
 
-        SendMessage(WM_INITDIALOG, (WPARAM)hWnd);
-
+		SendMessage(WM_INITDIALOG, (WPARAM)hWnd);
         m_richView.ShowAllRealWindows(TRUE);
 
         if (m_hWnd == hWnd)
         {
-            SIZE sizeDefault = m_richView.GetDefaultSize();
             if (sizeDefault.cx && sizeDefault.cy)
             {
                 ResizeClient(sizeDefault, FALSE);
