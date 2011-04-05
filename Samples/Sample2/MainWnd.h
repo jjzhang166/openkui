@@ -16,6 +16,12 @@ public:
 	void OnDec();
 	void OnNotify( UINT nID, LPCSTR pClassName );
 
+	void OnShowProgress();
+	void WindowMoveLeft();
+	void WindowMoveRight();
+	void ProgressMoveLeft();
+	void ProgressMoveRight();
+
 	void OnTimer(UINT_PTR nIDEvent);   // ¶¯»­¶¨Ê±Æ÷
 
 	KUI_NOTIFY_MAP(IDC_RICHVIEW_WIN)
@@ -24,6 +30,11 @@ public:
         KUI_NOTIFY_ID_COMMAND(60003, OnBkBtnMin)
 		KUI_NOTIFY_ID_COMMAND(9, OnAdd)
 		KUI_NOTIFY_ID_COMMAND(10, OnDec)
+		KUI_NOTIFY_ID_COMMAND(12, OnShowProgress)
+		KUI_NOTIFY_ID_COMMAND(13, WindowMoveLeft)
+		KUI_NOTIFY_ID_COMMAND(14, WindowMoveRight)
+		KUI_NOTIFY_ID_COMMAND(15, ProgressMoveLeft)
+		KUI_NOTIFY_ID_COMMAND(16, ProgressMoveRight)
 		KUI_NOTIFY_COMMAND( OnNotify )
         //KUI_NOTIFY_TAB_SELCHANGE(IDC_TAB_MAIN, OnBkTabMainSelChange)
     KUI_NOTIFY_MAP_END()
@@ -43,4 +54,5 @@ public:
 	END_MSG_MAP()
 protected:
 	int					m_nCurProgress;
+	CRect				m_rtProgress;
 };
