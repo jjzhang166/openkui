@@ -26,6 +26,9 @@ public:
 
 	void OnTimer(UINT_PTR nIDEvent);   // ¶¯»­¶¨Ê±Æ÷
 
+	// ListCtrl Item Change
+	LRESULT OnSelChange(LPNMHDR pnmh);
+
 	KUI_NOTIFY_MAP(IDC_RICHVIEW_WIN)
         KUI_NOTIFY_ID_COMMAND(60001, OnBkBtnClose)
         KUI_NOTIFY_ID_COMMAND(60002, OnBkBtnMax)
@@ -46,6 +49,7 @@ public:
 		//MSG_WM_SYSCOMMAND(OnSysCommand)
 		MSG_WM_DESTROY(OnDestroy)
 		MSG_WM_SYSCOMMAND(OnSysCommand)
+		NOTIFY_HANDLER_EX(101, LVN_ITEMCHANGED, OnSelChange)
 		REFLECT_NOTIFICATIONS_EX()
 	END_MSG_MAP()
 protected:

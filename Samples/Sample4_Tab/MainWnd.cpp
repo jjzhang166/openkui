@@ -164,3 +164,16 @@ void CMainWnd::OnStartGame()
 	SetFocus();
 	::OnStartGame( m_SnakeGame.m_hWnd );
 }
+
+// ListCtrl Item Change
+LRESULT CMainWnd::OnSelChange(LPNMHDR pnmh)
+{
+	LPNMLISTVIEW pItem = (LPNMLISTVIEW)pnmh;
+	if( ( pItem->uChanged & LVIF_STATE ) == LVIF_STATE && ( pItem->uNewState & LVIS_SELECTED ) == LVIS_SELECTED )
+	{
+		CString str;
+		str.Format( _T("Current Seleted Item %d."), pItem->iItem );
+		CKuiMsgBox::Show( str, _T("ÌבÊ¾") );
+	}
+	return 0;
+}
